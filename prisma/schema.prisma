@@ -1,0 +1,43 @@
+// EMS Prisma Schema - Production Ready
+// Generated for Next.js 16 with TypeScript + PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User model for authentication
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String
+  role      String     @default("ADMIN") // Only ADMIN supported currently
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  @@index([email])
+}
+
+// Employee model for management
+model Employee {
+  id                String   @id @default(cuid())
+  firstName         String   @db.VarChar(100)
+  lastName          String   @db.VarChar(100)
+  email             String   @unique @db.VarChar(255)
+  phone             String?  @db.VarChar(20)
+  department        String   @db.VarChar(100)
+  position          String   @db.VarChar(100)
+  salary            Float    // in organization's currency
+  status            String   @default("ACTIVE") // ACTIVE, INACTIVE, TERMINATED
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  createdByUserId   String   // Store as non-relational field - NOT exposed in API
+  
+  @@index([email])
+  @@index([department])
+  @@index([createdAt])
+  @@index([status])
+}

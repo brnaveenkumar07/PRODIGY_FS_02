@@ -1,0 +1,720 @@
+{
+  "info": {
+    "name": "EMS API - Complete Test Suite",
+    "description": "Employee Management System API Testing Collection",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "employee_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "✅ Login - Valid Credentials",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success true', function() {",
+                  "  pm.expect(pm.response.json().success).to.equal(true);",
+                  "});",
+                  "",
+                  "pm.test('Response contains user data', function() {",
+                  "  pm.expect(pm.response.json().data).to.have.keys('id', 'email', 'role');",
+                  "});",
+                  "",
+                  "// Save auth_token from cookies",
+                  "var cookies = pm.response.cookies;",
+                  "var authCookie = cookies.get('auth_token');",
+                  "if (authCookie) {",
+                  "  pm.environment.set('auth_token', authCookie);",
+                  "  pm.test('Auth token cookie set', function() {",
+                  "    pm.expect(authCookie).to.be.truthy();",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"email\\\": \\\"admin@ems.com\\\",\\n  \\\"password\\\": \\\"Admin@123\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "❌ Login - Invalid Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"email\\\": \\\"admin@ems.com\\\",\\n  \\\"password\\\": \\\"wrongpassword\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "❌ Login - Invalid Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"email\\\": \\\"nonexistent@example.com\\\",\\n  \\\"password\\\": \\\"Admin@123\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "❌ Login - Malformed Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"email\\\": \\\"not-an-email\\\",\\n  \\\"password\\\": \\\"Admin@123\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "✅ Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 Employees - READ",
+      "item": [
+        {
+          "name": "✅ List All Employees (Pagination)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has pagination', function() {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.expect(jsonData.pagination).to.have.keys('page', 'limit', 'total', 'totalPages');",
+                  "});",
+                  "",
+                  "pm.test('Data is array', function() {",
+                  "  pm.expect(pm.response.json().data).to.be.an('array');",
+                  "});",
+                  "",
+                  "// Save first employee ID",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data.length > 0) {",
+                  "  pm.environment.set('employee_id', jsonData.data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employees?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "✅ Search Employees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employees?search=John&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "John"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "✅ Sort by Department",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employees?sortBy=department&sortOrder=asc&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees"],
+              "query": [
+                {
+                  "key": "sortBy",
+                  "value": "department"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "asc"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "❌ Pagination - Limit > 100",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 400 for limit > 100', function() {",
+                  "  pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employees?page=1&limit=150",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "150"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "✅ Get Single Employee",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employees/{{employee_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "{{employee_id}}"]
+            }
+          }
+        },
+        {
+          "name": "❌ Get Non-Existent Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 404', function() {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employees/invalid_id_12345",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "invalid_id_12345"]
+            }
+          }
+        },
+        {
+          "name": "❌ List Without Auth",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 401 Unauthorized', function() {",
+                  "  pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employees",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 Employees - CREATE",
+      "item": [
+        {
+          "name": "✅ Create Valid Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201', function() {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response contains employee data', function() {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.expect(jsonData.data).to.have.keys('id', 'firstName', 'lastName', 'email', 'phone', 'department', 'position', 'salary', 'status', 'createdAt', 'updatedAt');",
+                  "});",
+                  "",
+                  "// Save new employee ID for update/delete tests",
+                  "pm.environment.set('new_employee_id', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"firstName\\\": \\\"Alice\\\",\\n  \\\"lastName\\\": \\\"Cooper\\\",\\n  \\\"email\\\": \\\"alice.cooper@example.com\\\",\\n  \\\"phone\\\": \\\"+1-555-0106\\\",\\n  \\\"department\\\": \\\"Marketing\\\",\\n  \\\"position\\\": \\\"Marketing Manager\\\",\\n  \\\"salary\\\": 110000\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees"]
+            }
+          }
+        },
+        {
+          "name": "❌ Create - Duplicate Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Returns 409 Conflict', function() {",
+                  "  pm.response.to.have.status(409);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"firstName\\\": \\\"John\\\",\\n  \\\"lastName\\\": \\\"Duplicate\\\",\\n  \\\"email\\\": \\\"john.doe@example.com\\\",\\n  \\\"phone\\\": \\\"+1-555-0107\\\",\\n  \\\"department\\\": \\\"Engineering\\\",\\n  \\\"position\\\": \\\"Developer\\\",\\n  \\\"salary\\\": 120000\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees"]
+            }
+          }
+        },
+        {
+          "name": "❌ Create - Missing Required Field",
+          "event": [
+            {
+              "listen": "test",
+              "script": [
+                "pm.test('Returns 400 Validation Error', function() {",
+                "  pm.response.to.have.status(400);",
+                "});"
+              ]
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"firstName\\\": \\\"Test\\\",\\n  \\\"lastName\\\": \\\"User\\\",\\n  \\\"email\\\": \\\"test@example.com\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees"]
+            }
+          }
+        },
+        {
+          "name": "❌ Create - Negative Salary",
+          "event": [
+            {
+              "listen": "test",
+              "script": [
+                "pm.test('Returns 400 Validation Error', function() {",
+                "  pm.response.to.have.status(400);",
+                "});"
+              ]
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"firstName\\\": \\\"Test\\\",\\n  \\\"lastName\\\": \\\"User\\\",\\n  \\\"email\\\": \\\"test2@example.com\\\",\\n  \\\"phone\\\": \\\"+1-555-0108\\\",\\n  \\\"department\\\": \\\"IT\\\",\\n  \\\"position\\\": \\\"Dev\\\",\\n  \\\"salary\\\": -5000\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees"]
+            }
+          }
+        },
+        {
+          "name": "❌ Create - Invalid Email Format",
+          "event": [
+            {
+              "listen": "test",
+              "script": [
+                "pm.test('Returns 400 Validation Error', function() {",
+                "  pm.response.to.have.status(400);",
+                "});"
+              ]
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"firstName\\\": \\\"Test\\\",\\n  \\\"lastName\\\": \\\"User\\\",\\n  \\\"email\\\": \\\"not-an-email\\\",\\n  \\\"phone\\\": \\\"+1-555-0109\\\",\\n  \\\"department\\\": \\\"IT\\\",\\n  \\\"position\\\": \\\"Dev\\\",\\n  \\\"salary\\\": 100000\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 Employees - UPDATE",
+      "item": [
+        {
+          "name": "✅ Update - Change Salary",
+          "event": [
+            {
+              "listen": "test",
+              "script": [
+                "pm.test('Status is 200', function() {",
+                "  pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test('Salary updated', function() {",
+                "  pm.expect(pm.response.json().data.salary).to.equal(175000);",
+                "});"
+              ]
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"salary\\\": 175000\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/{{employee_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "{{employee_id}}"]
+            }
+          }
+        },
+        {
+          "name": "✅ Update - Multiple Fields",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"position\\\": \\\"Senior Manager\\\",\\n  \\\"department\\\": \\\"Executive Board\\\",\\n  \\\"salary\\\": 200000\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/{{employee_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "{{employee_id}}"]
+            }
+          }
+        },
+        {
+          "name": "❌ Update - Duplicate Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": [
+                "pm.test('Returns 409', function() {",
+                "  pm.response.to.have.status(409);",
+                "});"
+              ]
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"email\\\": \\\"jane.smith@example.com\\\"\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/{{employee_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "{{employee_id}}"]
+            }
+          }
+        },
+        {
+          "name": "❌ Update - Non-Existent Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": [
+                "pm.test('Returns 404', function() {",
+                "  pm.response.to.have.status(404);",
+                "});"
+              ]
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \\\"salary\\\": 100000\\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employees/invalid_id_12345",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "invalid_id_12345"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 Employees - DELETE",
+      "item": [
+        {
+          "name": "✅ Delete Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": [
+                "pm.test('Status is 200', function() {",
+                "  pm.response.to.have.status(200);",
+                "});"
+              ]
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employees/{{new_employee_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "{{new_employee_id}}"]
+            }
+          }
+        },
+        {
+          "name": "❌ Delete - Non-Existent Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": [
+                "pm.test('Returns 404', function() {",
+                "  pm.response.to.have.status(404);",
+                "});"
+              ]
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employees/invalid_id_12345",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "invalid_id_12345"]
+            }
+          }
+        },
+        {
+          "name": "❌ Delete - Without Auth",
+          "event": [
+            {
+              "listen": "test",
+              "script": [
+                "pm.test('Returns 401', function() {",
+                "  pm.response.to.have.status(401);",
+                "});"
+              ]
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employees/{{employee_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "employees", "{{employee_id}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
