@@ -91,7 +91,7 @@ export interface CreateEmployeeFormData {
   salary: number;
 }
 
-export interface UpdateEmployeeFormData extends Partial<CreateEmployeeFormData> {}
+export type UpdateEmployeeFormData = Partial<CreateEmployeeFormData>;
 
 /**
  * Query Types

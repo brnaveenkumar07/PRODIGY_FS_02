@@ -89,7 +89,7 @@ export function EmployeeFormDialog({
       await onSubmit(data, employee?.id);
       form.reset();
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       toast.error("Failed to save employee");
     }
   };

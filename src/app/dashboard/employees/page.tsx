@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -51,11 +51,7 @@ export default function EmployeesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  useEffect(() => {
-    fetchEmployees();
-  }, [pagination.page, searchQuery]);
-
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     const params = new URLSearchParams({
       page: pagination.page.toString(),
       limit: pagination.limit.toString(),
@@ -78,7 +74,11 @@ export default function EmployeesPage() {
         setPagination(paginationData);
       }
     }
-  };
+  }, [pagination.limit, pagination.page, request, searchQuery]);
+
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
 
   const handleCreateEmployee = async (
     data: CreateEmployeeInput,

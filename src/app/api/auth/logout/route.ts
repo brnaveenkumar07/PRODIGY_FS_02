@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { clearAuthCookie } from "@/lib/auth";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
@@ -6,7 +5,7 @@ import { successResponse, errorResponse } from "@/lib/api-response";
  * POST /api/auth/logout
  * Clear authentication cookie
  */
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     await clearAuthCookie();
     return successResponse(null, "Logout successful", 200);

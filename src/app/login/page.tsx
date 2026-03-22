@@ -2,11 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { useApi } from "@/hooks/useApi";
@@ -77,29 +82,21 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="********"
                 value={formData.password}
                 onChange={handleChange}
                 required
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Logging in..." : "Login"}
             </Button>
 
             <div className="text-sm text-center text-muted-foreground">
               <p>Demo credentials:</p>
-              <p className="font-mono text-xs">
-                Email: admin@ems.com
-              </p>
-              <p className="font-mono text-xs">
-                Password: Admin@123
-              </p>
+              <p className="font-mono text-xs">Email: admin@ems.com</p>
+              <p className="font-mono text-xs">Password: Admin@123</p>
             </div>
           </form>
         </CardContent>
