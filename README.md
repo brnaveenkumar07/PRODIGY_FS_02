@@ -133,3 +133,5 @@ npm run db:studio  # Open Prisma Studio
 ## Why This Project
 
 This project demonstrates how to build a secure and scalable admin-facing management system using the modern Next.js app architecture. It is a solid example of combining frontend UI, backend APIs, authentication, validation, and database integration in one cohesive full-stack application.
+
+https://ems-naveen.vercel.app/login
